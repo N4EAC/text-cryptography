@@ -28,8 +28,8 @@ except ImportError:
     InvalidToken = Exception
 
 APP_NAME = "EADC Text Crypt"
-APP_ID = "N4EAC.EADCTextCrypt.1_2"
-APP_VERSION = "1.2.0"
+APP_ID = "N4EAC.EADCTextCrypt.1_2_1"
+APP_VERSION = "1.2.1"
 KEY_FILE = "secret.key"
 EADC_MAGIC = "EADC-TEXT-CRYPT"
 EADC_VERSION = 2
@@ -317,41 +317,88 @@ class EADCApp(tk.Tk):
             w.bind("<Double-Button-1>", lambda e: self._toggle_maximize())
         self.grip.bind("<ButtonPress-1>", self._start_resize)
         self.grip.bind("<B1-Motion>", self._do_resize)
-        self.bind("<Map>", lambda e: self.after(20, self._restore_borderless_and_taskbar))
-        self.after(250, self._force_taskbar_icon)
+        self.bind("<Map>", lambda e: self.after(50, self._restore_borderless_and_taskbar))
+        # Several delayed passes are intentional.  When launched from an installer
+        # location such as Program Files, Windows can initially classify a
+        # borderless Tk window as a tool window.  Re-applying the application
+        # window style after the shell has mapped the HWND makes the taskbar icon
+        # reliable.
+        self.after(150, self._force_taskbar_icon)
+        self.after(650, self._taskbar_shell_refresh)
+        self.after(1200, self._force_taskbar_icon)
 
     def _restore_borderless_and_taskbar(self):
         self.overrideredirect(True)
-        self._force_taskbar_icon()
+        self.after(30, self._force_taskbar_icon)
+
+    def _get_hwnds_for_taskbar(self):
+        user32 = ctypes.windll.user32
+        hwnd = self.winfo_id()
+        hwnds = {hwnd}
+        parent = user32.GetParent(hwnd)
+        if parent:
+            hwnds.add(parent)
+        owner = user32.GetWindow(hwnd, 4)  # GW_OWNER
+        if owner:
+            hwnds.add(owner)
+        return hwnds
 
     def _force_taskbar_icon(self):
         # Borderless Tk windows can disappear from the Windows taskbar.
-        # Force APPWINDOW style and refresh the shell frame.
+        # Force APPWINDOW style, remove TOOLWINDOW style, and refresh the shell frame.
         if sys.platform != "win32" or ctypes is None:
             return
         try:
             self.update_idletasks()
             user32 = ctypes.windll.user32
-            hwnds = {self.winfo_id()}
-            parent = user32.GetParent(self.winfo_id())
-            if parent:
-                hwnds.add(parent)
+
             GWL_EXSTYLE = -20
             WS_EX_APPWINDOW = 0x00040000
             WS_EX_TOOLWINDOW = 0x00000080
             SWP_NOMOVE = 0x0002
             SWP_NOSIZE = 0x0001
             SWP_NOZORDER = 0x0004
+            SWP_NOOWNERZORDER = 0x0200
             SWP_FRAMECHANGED = 0x0020
-            for hwnd in hwnds:
-                style = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+
+            # Use pointer-sized APIs when available so 64-bit Windows keeps all bits.
+            get_style = getattr(user32, "GetWindowLongPtrW", user32.GetWindowLongW)
+            set_style = getattr(user32, "SetWindowLongPtrW", user32.SetWindowLongW)
+            for hwnd in self._get_hwnds_for_taskbar():
+                style = get_style(hwnd, GWL_EXSTYLE)
                 style = (style | WS_EX_APPWINDOW) & ~WS_EX_TOOLWINDOW
-                user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
-                user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED)
-            self.iconphoto(True, self._app_icon_image) if self._app_icon_image else None
+                set_style(hwnd, GWL_EXSTYLE, style)
+                user32.SetWindowPos(
+                    hwnd, 0, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED
+                )
+
+            if self._app_icon_image:
+                self.iconphoto(True, self._app_icon_image)
             ico = resource_path("eadc_icon.ico")
             if os.path.exists(ico):
                 self.iconbitmap(ico)
+        except Exception:
+            pass
+
+    def _taskbar_shell_refresh(self):
+        # A very short withdraw/deiconify cycle forces Windows Explorer to recreate
+        # the taskbar entry for the now-corrected APPWINDOW style.
+        if sys.platform != "win32" or ctypes is None:
+            return
+        try:
+            geom = self.geometry()
+            self.withdraw()
+            self.after(60, lambda: self._finish_taskbar_shell_refresh(geom))
+        except Exception:
+            self._force_taskbar_icon()
+
+    def _finish_taskbar_shell_refresh(self, geom):
+        try:
+            self.deiconify()
+            self.geometry(geom)
+            self.overrideredirect(True)
+            self.after(60, self._force_taskbar_icon)
         except Exception:
             pass
 

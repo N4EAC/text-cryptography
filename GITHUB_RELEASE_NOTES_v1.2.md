@@ -1,4 +1,4 @@
-# EADC Text Crypt v1.2 Release Notes
+# EADC Text Crypt v1.2.1 Release Notes
 
 ## Highlights
 

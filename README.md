@@ -1,19 +1,16 @@
-# EADC Text Crypt v1.2
+# EADC Text Crypt v1.2.1
 
 EADC Text Crypt is a small offline GUI utility for encrypting and decrypting text files using the Fernet encryption approach from the original `text-cryptography` project.
 
-## What is new in v1.2
+## What is new in v1.2.1
 
-- New binary/scrambled `.eadc` file format so Notepad no longer shows readable JSON.
-- New binary/scrambled `.key` export/import format so Notepad no longer shows the plain Fernet key.
-- Backward compatibility with earlier readable JSON `.eadc` files.
-- Earlier `.eadc` files can be opened, decrypted, and saved again as the new v1.2 binary format.
-- Existing raw Fernet `.key` files can still be imported.
-- The GUI now displays a package summary instead of showing the full encrypted JSON wrapper.
+- Maintenance patch for the Windows taskbar icon when using the custom borderless BeOS/X11-style title bar.
+- Improved Windows application-window registration when launched from `C:\Program Files`.
+- Keeps all v1.2 features: binary/scrambled `.eadc` files, binary/scrambled `.key` exports, and backward compatibility with earlier readable JSON `.eadc` files.
 
 ## Important security note
 
-The v1.2 binary format is intended to make `.eadc` and `.key` files unreadable in normal text editors and harder to casually inspect. The actual encryption remains Fernet. Anyone who has both the `.eadc` file and the matching `secret.key` can decrypt the text.
+The v1.2.1 binary format is intended to make `.eadc` and `.key` files unreadable in normal text editors and harder to casually inspect. The actual encryption remains Fernet. Anyone who has both the `.eadc` file and the matching `secret.key` can decrypt the text.
 
 Keep the key secure and separate from encrypted files.
 
@@ -27,7 +24,7 @@ Keep this key safe. If you lose the key, encrypted `.eadc` files made with that 
 
 ### Import a key
 
-Click **Import Key** and choose an existing `.key` file. The program accepts both v1.2 scrambled key files and older raw Fernet key files, then stores the loaded key as `secret.key` in the program folder.
+Click **Import Key** and choose an existing `.key` file. The program accepts both v1.2.1 scrambled key files and older raw Fernet key files, then stores the loaded key as `secret.key` in the program folder.
 
 Use this when decrypting files created on another computer or with an older key.
 

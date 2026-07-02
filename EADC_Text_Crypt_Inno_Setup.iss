@@ -7,7 +7,7 @@
 ;   3. Compile
 
 #define MyAppName "EADC Text Crypt"
-#define MyAppVersion "1.2"
+#define MyAppVersion "1.2.1"
 #define MyAppPublisher "N4EAC"
 #define MyAppExeName "EADC_Text_Crypt.exe"
 
