@@ -1,22 +1,76 @@
-# text-cryptography
-A simple python script which performs text encryption and decryption 
+# EADC Text Crypt v1.2
 
-Make sure python3 and pip are installed.
+EADC Text Crypt is a small offline GUI utility for encrypting and decrypting text files using the Fernet encryption approach from the original `text-cryptography` project.
 
-Install cryptography library:
-Run the following command in your terminal to install the required library:
-pip install cryptography
+## What is new in v1.2
 
-Run the script:
-Save the script as encrypt_decrypt.py and execute it. python3 encrypt_decrypt.py
+- New binary/scrambled `.eadc` file format so Notepad no longer shows readable JSON.
+- New binary/scrambled `.key` export/import format so Notepad no longer shows the plain Fernet key.
+- Backward compatibility with earlier readable JSON `.eadc` files.
+- Earlier `.eadc` files can be opened, decrypted, and saved again as the new v1.2 binary format.
+- Existing raw Fernet `.key` files can still be imported.
+- The GUI now displays a package summary instead of showing the full encrypted JSON wrapper.
 
-Generate a Key:
-Select option 1 to generate and save a key file named secret.key. (share this key file with the person you intend to exchange encrypted messages)
+## Important security note
 
-Encrypt Text:
-Select option 2 to input text, and the script will output the encrypted text.
+The v1.2 binary format is intended to make `.eadc` and `.key` files unreadable in normal text editors and harder to casually inspect. The actual encryption remains Fernet. Anyone who has both the `.eadc` file and the matching `secret.key` can decrypt the text.
 
-Decrypt Text:
-Select option 3 to input the encrypted text, and the script will output the original text.
+Keep the key secure and separate from encrypted files.
 
-This script ensures that encryption and decryption are handled securely, and the key is safely stored in a file.
+## How to use
+
+### Generate a key
+
+Click **Generate New Key**. This creates `secret.key` in the program folder.
+
+Keep this key safe. If you lose the key, encrypted `.eadc` files made with that key cannot be decrypted.
+
+### Import a key
+
+Click **Import Key** and choose an existing `.key` file. The program accepts both v1.2 scrambled key files and older raw Fernet key files, then stores the loaded key as `secret.key` in the program folder.
+
+Use this when decrypting files created on another computer or with an older key.
+
+### Encrypt text
+
+1. Generate or import a key.
+2. Type, paste, or load text into the **PLAINTEXT** box.
+3. Click **ENCRYPT**.
+4. Click **Save to .eadc File...**.
+
+### Decrypt a file
+
+1. Make sure the matching `secret.key` is loaded.
+2. Click **Open .eadc File...**.
+3. Click **DECRYPT**.
+4. The decrypted text appears in the **PLAINTEXT** box.
+
+### Clear
+
+The **CLEAR** button clears the current text and file state, but it does **not** delete or unload `secret.key`.
+
+## Build EXE on Windows
+
+Run:
+
+```bat
+build_exe.bat
+```
+
+The compiled program will be created in the `dist` folder.
+
+## Requirements
+
+- Python 3.10+
+- cryptography
+- pyinstaller, only needed for building the EXE
+
+Install manually with:
+
+```bash
+pip install -r requirements.txt
+```
+
+## License
+
+GNU GPL. See `LICENSE`.
