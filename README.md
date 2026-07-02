@@ -1,6 +1,7 @@
 # EADC Text Crypt v1.2.1
 
 EADC Text Crypt is a small offline GUI utility for encrypting and decrypting text files using the Fernet encryption approach from the original `text-cryptography` project.
+<img width="1180" height="760" alt="image" src="https://github.com/user-attachments/assets/8720122e-3fb4-43ce-82ea-d100cb807aa9" />
 
 ## What is new in v1.2.1
 
